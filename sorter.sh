@@ -1,12 +1,29 @@
 #!/bin/bash
-for image in $(find ./tosort -type f -regextype egrep -iregex '.*\.(MP4|JPG)$')
-do
-	date=$(stat -c %y $image | egrep -o '^[0-9]{4}-[0-9]{2}-[0-9]{2}')
+
+dest='./../'
+
+getstamp() {
+	date=$(stat -c %y $1 | egrep -o '^[0-9]{4}-[0-9]{2}-[0-9]{2}')
 	year=$(echo $date | cut -d'-' -f 1)
 	month=$(echo $date | cut -d'-' -f 2)
 	day=$(echo $date | cut -d'-' -f 3)
-	mkdir -p $year/$month.$day.$(echo $year | cut -c3-4)/
-	mv $image $year/$month.$day.$(echo $year | cut -c3-4)/
+	echo $year/$month.$day.$(echo $year | cut -c3-4)
+}
+
+for image in $(find . -type f -regextype egrep -iregex '.*\.(MP4|JPG|JPEG)$')
+do
+	stamp=$dest$(getstamp $image)
+	title=$(find $stamp* -type d)
+	if [ $(echo $title | grep -o $stamp) == $stamp ]
+	then
+		mv $image $stamp*
+	else
+		mkdir -p $stamp
+		mv $image $stamp
+	fi
 done;
 
-rm -rf ./tosort/*
+for file in $(ls | egrep '[^sorter\.sh]')
+do
+	rm -rf $file
+done;
