@@ -1,7 +1,8 @@
 #!/bin/bash
 
-dest='./../'
+dest=/home/$USER/Pictures/
 
+# returns destination folder name based on file creation date
 getstamp() {
 	date=$(stat -c %y $1 | egrep -o '^[0-9]{4}-[0-9]{2}-[0-9]{2}')
 	year=$(echo $date | cut -d'-' -f 1)
@@ -10,10 +11,12 @@ getstamp() {
 	echo $year/$month.$day.$(echo $year | cut -c3-4)
 }
 
-for image in $(find . -type f -regextype egrep -iregex '.*\.(MP4|JPG|JPEG)$')
+for image in $(find . -maxdepth 1 -type f -regextype egrep -iregex '.*\.(MP4|JPG|JPEG|PNG)$')
 do
 	stamp=$dest$(getstamp $image)
 	title=$(find $stamp* -type d)
+	echo $stamp
+	echo $title
 	if [ $(echo $title | grep -o $stamp) == $stamp ]
 	then
 		mv $image $stamp*
@@ -21,9 +24,4 @@ do
 		mkdir -p $stamp
 		mv $image $stamp
 	fi
-done;
-
-for file in $(ls | egrep '[^sorter\.sh]')
-do
-	rm -rf $file
 done;
